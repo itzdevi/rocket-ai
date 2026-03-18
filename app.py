@@ -3,14 +3,17 @@ import graphics
 import rocket
 import ground
 import touchdown_point
+import agent
 
 ROCKET_MASS = 1000
-FPS = 60
+FPS = 240
+TIME_MULTIPLIER_FACTOR = 1
 
 class App:
-    def __init__(self):
+    def __init__(self, agent: agent.Agent):
         pygame.init()
 
+        self.__agent = agent
         self.__graphics = graphics.Graphics((800, 600))
         self.__env = rocket.Rocket(ROCKET_MASS)
         self.__ground = ground.Ground()
@@ -26,8 +29,8 @@ class App:
     def tick(self):
         self.__handle_events()
 
-        dt = self.__clock.tick(FPS) / 1000
-        self.__env.tick(dt)
+        dt = self.__clock.tick(FPS) / 1000 * TIME_MULTIPLIER_FACTOR
+        self.__env.tick(dt, self.__agent)
 
     def draw(self):
         self.__graphics.set_zoom(self.__zoom)

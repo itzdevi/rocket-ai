@@ -1,6 +1,9 @@
 import pygame
 import graphics
 import math
+import action
+import agent
+import state
 
 THRUST = 20000
 GIMBAL_ANGLE = 7
@@ -20,10 +23,17 @@ class Rocket:
         self.__net_force = [0, 0]
         self.__net_torque = 0
 
+    def get_state(self) -> state.State:
+        return state.State(
+            self.position,
+            self.rotation,
+            self.__velocity,
+            self.__angular_velocity
+        )
 
-    def tick(self, dt):
+    def tick(self, dt, agent: agent.Agent):
         self.__apply_gravity()
-        self.__apply_thrust()
+        self.__apply_thrust(agent.get_action(self.get_state()))
         self.__update_kinematics(dt)
 
         self.__handle_collisions()
@@ -56,17 +66,11 @@ class Rocket:
             self.__angular_velocity = 0
             self.position[1] = self.__size[1] / 2
 
-    def __apply_thrust(self):
-        keys = pygame.key.get_pressed()
-        gimbal_angle = 0
-        if keys[pygame.K_a]:
-            gimbal_angle = GIMBAL_ANGLE
-            self.__net_torque += REACTION_WHEEL_TORQUE
-        elif keys[pygame.K_d]:
-            gimbal_angle = -GIMBAL_ANGLE
-            self.__net_torque -= REACTION_WHEEL_TORQUE
-        if keys[pygame.K_w]:
-            rot_rad = math.radians(self.rotation + gimbal_angle)
-            self.__net_force[0] += THRUST * math.sin(rot_rad)
-            self.__net_force[1] -= THRUST * math.cos(rot_rad)
-            self.__net_torque += (self.__size[1] / 2 * PIXELS_PER_METER) * THRUST * math.sin(math.radians(gimbal_angle))
+    def __apply_thrust(self, a: action.Action):
+        gimbal_angle = a.roll * GIMBAL_ANGLE
+        self.__net_torque += a.roll * REACTION_WHEEL_TORQUE
+
+        rot_rad = math.radians(self.rotation + gimbal_angle)
+        self.__net_force[0] += THRUST * math.sin(rot_rad) * a.throttle
+        self.__net_force[1] -= THRUST * math.cos(rot_rad) * a.throttle
+        self.__net_torque += (self.__size[1] / 2 * PIXELS_PER_METER) * THRUST * math.sin(math.radians(gimbal_angle)) * a.throttle

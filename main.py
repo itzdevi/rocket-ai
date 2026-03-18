@@ -1,7 +1,8 @@
 import app
 import keyboard_agent
+import controller_agent
 
-a = app.App(keyboard_agent.KeyboardAgent())
+a = app.App(controller_agent.ControllerAgent())
 
 while a.is_running():
     a.tick()

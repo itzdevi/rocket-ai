@@ -67,6 +67,9 @@ class Rocket:
             self.position[1] = self.__size[1] / 2
 
     def __apply_thrust(self, a: action.Action):
+        a.roll = min(1, max(-1, a.roll))
+        a.throttle = min(1, max(0, a.throttle))
+
         gimbal_angle = a.roll * GIMBAL_ANGLE
         self.__net_torque += a.roll * REACTION_WHEEL_TORQUE
 

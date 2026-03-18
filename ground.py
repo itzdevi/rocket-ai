@@ -9,5 +9,5 @@ class Ground:
                 screen_size[0],
                 screen_size[1] / 2 + rocket_position[1] * zoom
             ),
-            (38, 139, 7)
+            (85, 82, 83)
         )

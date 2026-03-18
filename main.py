@@ -1,7 +1,8 @@
 import app
 
-app = app.App()
+a = app.App()
 
-while app.is_running():
-    app.tick()
-    app.draw()
+while a.is_running():
+    a.tick()
+    a.draw()
+    

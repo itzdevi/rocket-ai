@@ -18,7 +18,7 @@ class App:
         self.__zoom = 1
         self.__running = True
 
-        self.__env.position = [0, 7500]
+        self.__env.__position = [0, 7500]
 
     def is_running(self): return self.__running
 
@@ -30,10 +30,10 @@ class App:
 
     def draw(self):
         self.__graphics.set_zoom(self.__zoom)
-        self.__graphics.fill((135, 206, 235))
+        self.__graphics.fill((0, 0, 0))
 
         self.__env.draw(self.__graphics)
-        self.__ground.draw(self.__graphics, self.__env.position, self.__graphics.screen_size, self.__zoom)
+        self.__ground.draw(self.__graphics, self.__env.__position, self.__graphics.__screen_size, self.__zoom)
 
         pygame.display.flip()
 

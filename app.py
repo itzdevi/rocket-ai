@@ -2,6 +2,7 @@ import pygame
 import graphics
 import rocket
 import ground
+import touchdown_point
 
 ROCKET_MASS = 1000
 FPS = 60
@@ -13,6 +14,7 @@ class App:
         self.__graphics = graphics.Graphics((800, 600))
         self.__env = rocket.Rocket(ROCKET_MASS)
         self.__ground = ground.Ground()
+        self.__touchdown_point = touchdown_point.TouchdownPoint()
         self.__clock = pygame.time.Clock()
         self.__zoom = 1
         self.__running = True
@@ -31,8 +33,9 @@ class App:
         self.__graphics.set_zoom(self.__zoom)
         self.__graphics.fill((0, 0, 0))
 
-        self.__env.draw(self.__graphics)
         self.__ground.draw(self.__graphics, self.__env.position, self.__graphics.screen_size, self.__zoom)
+        self.__touchdown_point.draw(self.__graphics, self.__env.position, self.__zoom)
+        self.__env.draw(self.__graphics)
 
         pygame.display.flip()
 

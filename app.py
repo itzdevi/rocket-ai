@@ -5,9 +5,7 @@ import ground
 import touchdown_point
 import agent
 
-ROCKET_MASS = 1000
-FPS = 240
-TIME_MULTIPLIER_FACTOR = 1
+from constants import *
 
 class App:
     def __init__(self, agent: agent.Agent):
@@ -15,14 +13,14 @@ class App:
 
         self.__agent = agent
         self.__graphics = graphics.Graphics((800, 600))
-        self.__env = rocket.Rocket(ROCKET_MASS)
+        self.env = rocket.Rocket()
         self.__ground = ground.Ground()
         self.__touchdown_point = touchdown_point.TouchdownPoint()
         self.__clock = pygame.time.Clock()
         self.__zoom = 1
         self.__running = True
 
-        self.__env.position = [0, 7500]
+        self.env.reset_environment()
 
     def is_running(self): return self.__running
 
@@ -30,15 +28,18 @@ class App:
         self.__handle_events()
 
         dt = self.__clock.tick(FPS) / 1000 * TIME_MULTIPLIER_FACTOR
-        self.__env.tick(dt, self.__agent)
+        self.env.tick(dt, self.__agent)
+
+        if self.env.get_done():
+            self.env.reset_environment()
 
     def draw(self):
         self.__graphics.set_zoom(self.__zoom)
         self.__graphics.fill((0, 0, 0))
 
-        self.__ground.draw(self.__graphics, self.__env.position, self.__graphics.screen_size, self.__zoom)
-        self.__touchdown_point.draw(self.__graphics, self.__env.position, self.__zoom)
-        self.__env.draw(self.__graphics)
+        self.__ground.draw(self.__graphics, self.env.position, self.__graphics.screen_size, self.__zoom)
+        self.__touchdown_point.draw(self.__graphics, self.env.position, self.__zoom)
+        self.env.draw(self.__graphics)
 
         pygame.display.flip()
 

@@ -23,17 +23,16 @@ class Rocket:
         self.__prev_dist = 0
 
     def reset_environment(self):
-        # Simplified starting conditions for curriculum learning
-        self.position = [random.uniform(200, 300), random.uniform(400, 500)]
+        self.position = [random.uniform(-80, 80) * PIXELS_PER_METER, random.uniform(30, 100) * PIXELS_PER_METER]
         self.rotation = random.uniform(-30, 30)
-        self.__velocity = [random.uniform(-10, 0), random.uniform(-10, 10)]
-        self.__angular_velocity = random.uniform(-5, 5)
+        self.__velocity = [random.uniform(-10, 10), random.uniform(-10, 0)]
+        self.__angular_velocity = random.uniform(-4, 4)
         self.__done = False
         self.__prev_dist = math.sqrt(self.position[0]**2 + self.position[1]**2)
 
     def get_state(self) -> state.State:
         return state.State(
-            (-self.position[0] / 300, -self.position[1] / 600),
+            (-self.position[0] / 300 * PIXELS_PER_METER, -self.position[1] / 600 * PIXELS_PER_METER),
             math.radians(self.rotation) / math.pi,
             (self.__velocity[0] / 20, self.__velocity[1] / 40),
             math.radians(self.__angular_velocity) / math.pi,
@@ -42,33 +41,23 @@ class Rocket:
         )
     
     def get_reward(self):
-        current_dist = math.sqrt(self.position[0]**2 + self.position[1]**2)
+        current_dist = math.sqrt(self.position[0]**2 + self.position[1]**2) * PIXELS_PER_METER
 
-        # 1. Potential-based reward shaping for distance (reward for getting closer)
-        reward = (self.__prev_dist - current_dist) * 0.1
+        dist_diff = self.__prev_dist - current_dist
+        reward = dist_diff * 0.2 
 
-        # Update for next step
-        self.__prev_dist = current_dist
+        # 2. Scale penalties relative to the main goal
+        # If the rocket is 10,000m away, fuel usage shouldn't matter as much as movement
+        reward -= 0.001 * (abs(self.rotation) / 180.0)
 
-        # 2. Continuous penalties
-        # Penalty for not being upright
-        reward -= 0.005 * (abs(self.rotation) / 180.0)
-        # Penalty for high velocity near ground (to encourage soft landing)
-        if self.position[1] < 200:
-            speed = math.sqrt(self.__velocity[0]**2 + self.__velocity[1]**2)
-            reward -= 0.005 * (speed / 40)
-        
-        # Penalty for fuel usage
-        reward -= 0.001 * self.__currentAction.throttle
-
-        # 3. Terminal rewards
+        # 3. Dynamic Terminal Reward
         if self.__done:
-            # Check for successful landing (stricter conditions)
-            if abs(self.position[0]) < 50 and abs(self.position[1] - self.__size[1]/2) < 5 and abs(self.__velocity[1]) < 5 and abs(self.rotation) < 10:
-                reward += 20.0  # Big reward for success
+            if abs(self.position[0]) < 100: # Slightly more generous for now
+                # Give a scaled reward based on landing quality
+                landing_quality = 1.0 / (1.0 + abs(self.__velocity[1]) + abs(self.rotation))
+                reward += 10.0 * landing_quality
             else:
-                reward -= 10.0  # Big penalty for any other termination (crash, out of bounds)
-                
+                reward -= 5.0 # Less punishing while learning the long distance
         return reward
 
 

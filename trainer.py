@@ -36,6 +36,7 @@ run = wandb.init(
 )
 
 MAX_ITERATIONS = 1000000
+CHECKPOINT_INTERVAL = 10
 for update in range(MAX_ITERATIONS):
     obs_buf, act_buf, logp_buf = [], [], []
     rew_buf, val_buf, done_buf = [], [], []
@@ -119,3 +120,7 @@ for update in range(MAX_ITERATIONS):
 
             mean_distance_error = torch.hypot(obs_batch[:, 0] * 300, obs_batch[:, 1] * 600).mean()
             run.log({ "total_loss": loss.item(), "value_loss": value_loss.item(), "policy_loss": policy_loss.item(), "entropy": entropy.item(), "returns": returns.mean().item(), "rewards": rewards.mean().item(), "mean_distance_error": mean_distance_error.item() })
+
+    if update % CHECKPOINT_INTERVAL == 0:
+        print("saving checkpoint")
+        torch.save(agent.model.state_dict(), "./model/model.pt")

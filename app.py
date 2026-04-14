@@ -12,7 +12,7 @@ class App:
         pygame.init()
 
         self.__agent = agent
-        self.__graphics = graphics.Graphics((800, 600))
+        self.__graphics = graphics.Graphics(WINDOW_SIZE)
         self.env = rocket.Rocket()
         self.__ground = ground.Ground()
         self.__touchdown_point = touchdown_point.TouchdownPoint()
@@ -29,9 +29,6 @@ class App:
 
         dt = self.__clock.tick(FPS) / 1000 * TIME_MULTIPLIER_FACTOR
         self.env.tick(dt, self.__agent)
-
-        if self.env.get_done():
-            self.env.reset_environment()
 
     def draw(self):
         self.__graphics.set_zoom(self.__zoom)

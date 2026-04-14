@@ -20,3 +20,13 @@ class State:
             self.throttle,
             self.roll
         ], dtype=np.float32)
+    
+    def __repr__(self):
+        return f"""State: (
+        Distance from touchdown: {self.distance_from_touchdown}
+        Rotation: {self.rotation}
+        Velocity: {self.velocity}
+        Angular velocity: {self.angular_velocity}
+        Throttle: {self.throttle}
+        Roll: {self.roll})
+        """

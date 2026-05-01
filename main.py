@@ -8,7 +8,7 @@ import constants
 a = app.App(ai_agent.AIAgent("./model/model.pt"))
 
 while a.is_running():
-    print(a.env.get_state().velocity)
+    print(0.3 - a.env.get_state().velocity[1])
     a.tick()
     a.draw()
     

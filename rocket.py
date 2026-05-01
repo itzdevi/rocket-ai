@@ -51,9 +51,9 @@ class Rocket:
         reward = 0
 
         st = self.get_state()
+        vert_vel = st.velocity[1]
 
         # phase 1
-        vert_vel = st.velocity[1]
         rew_phase1 = 0
         if vert_vel < 0:
             rew_phase1 = -2
@@ -62,7 +62,13 @@ class Rocket:
         else:
             rew_phase1 = 5
 
-        reward += rew_phase1 * 1
+        # phase 2
+        rew_phase2 = 0
+        descent_speed = 0.3
+        vert_vel_error_descent = descent_speed - vert_vel
+        rew_phase2 += 6 * np.exp(-2 * abs(vert_vel_error_descent)) - 1
+
+        reward += rew_phase1 * 0.3 + rew_phase2
         return reward
 
 

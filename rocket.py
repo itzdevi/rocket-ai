@@ -48,22 +48,15 @@ class Rocket:
         )
 
     def get_reward(self):
-        reward = 0.1
+        reward = 0
 
         st = self.get_state()
-        height = st.distance_from_touchdown[1]
-        vert_vel = st.velocity[1]
 
-        reward += 0.7 * math.exp(-1.3 * height**2)
-        if vert_vel < 0:
-            reward -= 0.7 * abs(vert_vel)
+        # phase 1
+        rew_phase1 = 0
+        rew_phase1 += np.sign(st.velocity[1]) * 0.2
 
-        if height < 0.7:
-            reward += max(-math.exp(4 * vert_vel**2) + 2, -2)
-
-        if self.get_done():
-            reward += -7 * math.sqrt(height) + 2
-
+        reward += rew_phase1 * 1
         return reward
 
 

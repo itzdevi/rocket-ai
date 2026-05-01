@@ -9,7 +9,7 @@ a = app.App(keyboard_agent.KeyboardAgent())
 # a = app.App(ai_agent.AIAgent("./model/model.pt"))
 
 while a.is_running():
-    print(a.env.get_state().distance_from_touchdown[1])
+    print(a.env.get_state().angular_velocity)
     a.tick()
     a.draw()
     

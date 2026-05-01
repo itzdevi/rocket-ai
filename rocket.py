@@ -53,6 +53,7 @@ class Rocket:
         vert_vel = st.velocity[1]
         alt = st.distance_from_touchdown[1]
         rot = st.rotation
+        ang_vel = st.angular_velocity
 
         # phase 1
         rew_phase1 = 0
@@ -74,12 +75,15 @@ class Rocket:
         descent_speed = 0.3
         vert_vel_error_descent = descent_speed - vert_vel
         rew_phase2 += 6 * np.exp(-2 * abs(vert_vel_error_descent)) - 1
-        reward = 0.3 * rew_phase1 + rew_phase2
+        # reward = 0.3 * rew_phase1 + rew_phase2
 
         # phase 3
-        # rew_phase3 = 6 * np.exp(-0.09 * abs(rot))
+        rew_phase3 = 6 * np.exp(-3 * abs(rot))
+        if abs(ang_vel) > 0.25:
+            self.__done = True
+            return -300
 
-        # reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase3
+        reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase3
         return reward
 
 
@@ -101,9 +105,7 @@ class Rocket:
 
     def __get_rotation_wrapped(self):
         x = (self.rotation + 180) % 360
-        if x < 0:
-            x += 360
-        return x
+        return x - 180
 
     def __update_kinematics(self, dt):
         # self.__velocity[0] += self.__net_force[0] / self.__mass * dt
@@ -112,7 +114,7 @@ class Rocket:
         self.position[1] -= self.__velocity[1] * PIXELS_PER_METER * dt
 
         self.__angular_velocity += (self.__net_torque / self.__moment_of_inertia) * dt
-        # self.rotation += math.degrees(self.__angular_velocity) * dt
+        self.rotation += math.degrees(self.__angular_velocity) * dt
 
         self.__net_force[0] = 0
         self.__net_force[1] = 0

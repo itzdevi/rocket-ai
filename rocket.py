@@ -75,15 +75,12 @@ class Rocket:
         descent_speed = 0.3
         vert_vel_error_descent = descent_speed - vert_vel
         rew_phase2 += 6 * np.exp(-2 * abs(vert_vel_error_descent)) - 1
-        # reward = 0.3 * rew_phase1 + rew_phase2
+        reward = 0.3 * rew_phase1 + rew_phase2
 
-        # phase 3
-        rew_phase3 = 6 * np.exp(-3 * abs(rot))
-        if abs(ang_vel) > 0.25:
-            self.__done = True
-            return -300
-
-        reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase3
+        # phase 2.5
+        rew_phase4 = 6 * np.exp(-3 * abs(ang_vel))
+        
+        reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase4
         return reward
 
 

@@ -2,11 +2,13 @@ import app
 import ai_agent
 import keyboard_agent
 
-a = app.App(keyboard_agent.KeyboardAgent())
-# a = app.App(ai_agent.AIAgent("./model/model.pt"))
+import constants
+
+# a = app.App(keyboard_agent.KeyboardAgent())
+a = app.App(ai_agent.AIAgent("./model/model.pt"))
 
 while a.is_running():
-    a.env.get_reward()
+    print(a.env.get_state().velocity)
     a.tick()
     a.draw()
     

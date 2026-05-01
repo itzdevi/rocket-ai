@@ -24,22 +24,21 @@ class Rocket:
         self.__prev_dist = 0
         self.__step_count = 0
 
-        self.__moment_of_inertia = (1/12) * self.__mass * ((self.__size[1]/2 / PIXELS_PER_METER)**2)
+        self.__moment_of_inertia = (1/12) * self.__mass * ((self.__size[1] / PIXELS_PER_METER) ** 2)
 
     def reset_environment(self):
         self.position[1] = random.randint(100, 500) * PIXELS_PER_METER
-        # self.__velocity[1] = random.uniform(-1.3, 0.4) * PIXELS_PER_METER
-        self.__velocity[1] = 0
+        self.__velocity[1] = random.uniform(0, 0.8) * PIXELS_PER_METER
+        # self.rotation = random.randint(-45, 45)
         self.__done = False
         self.__step_count = 0
         self.__prev_dist = math.sqrt(self.position[0]**2 + self.position[1]**2)
 
     def get_state(self) -> state.State:
-        # Use consistent normalization (Targeting -1 to 1)
         return state.State(
             (self.position[0] / (800 * PIXELS_PER_METER), # Screen width normalize
             self.position[1] / (1500 * PIXELS_PER_METER)), # Screen height normalize
-            math.radians(self.rotation) / math.pi,
+            math.radians(self.__get_rotation_wrapped()),
             (self.__velocity[0] / 50.0, # Expected max velocity
             self.__velocity[1] / 50.0),
             self.__angular_velocity / 10.0,
@@ -52,23 +51,35 @@ class Rocket:
 
         st = self.get_state()
         vert_vel = st.velocity[1]
+        alt = st.distance_from_touchdown[1]
+        rot = st.rotation
 
         # phase 1
         rew_phase1 = 0
         if vert_vel < 0:
-            rew_phase1 = -2
+            rew_phase1 = -15
         elif vert_vel > 0.4:
             rew_phase1 = 0.4
         else:
             rew_phase1 = 5
 
+        # reward += rew_phase1
+
         # phase 2
+        if vert_vel < -0.7 or alt > 0.5:
+            self.__done = True
+            return -1000
+
         rew_phase2 = 0
         descent_speed = 0.3
         vert_vel_error_descent = descent_speed - vert_vel
         rew_phase2 += 6 * np.exp(-2 * abs(vert_vel_error_descent)) - 1
+        reward = 0.3 * rew_phase1 + rew_phase2
 
-        reward += rew_phase1 * 0.3 + rew_phase2
+        # phase 3
+        # rew_phase3 = 6 * np.exp(-0.09 * abs(rot))
+
+        # reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase3
         return reward
 
 
@@ -88,14 +99,20 @@ class Rocket:
     def __apply_gravity(self):
         self.__net_force[1] += GRAVITY * self.__mass
 
+    def __get_rotation_wrapped(self):
+        x = (self.rotation + 180) % 360
+        if x < 0:
+            x += 360
+        return x
+
     def __update_kinematics(self, dt):
         # self.__velocity[0] += self.__net_force[0] / self.__mass * dt
         self.__velocity[1] += self.__net_force[1] / self.__mass * dt
         # self.position[0] += self.__velocity[0] * PIXELS_PER_METER * dt
         self.position[1] -= self.__velocity[1] * PIXELS_PER_METER * dt
 
-        # self.__angular_velocity += (self.__net_torque / self.__moment_of_inertia) * dt
-        # self.rotation += self.__angular_velocity * dt
+        self.__angular_velocity += (self.__net_torque / self.__moment_of_inertia) * dt
+        # self.rotation += math.degrees(self.__angular_velocity) * dt
 
         self.__net_force[0] = 0
         self.__net_force[1] = 0
@@ -125,4 +142,4 @@ class Rocket:
         rot_rad = math.radians(self.rotation + gimbal_angle)
         self.__net_force[0] += THRUST * math.sin(rot_rad) * a.throttle
         self.__net_force[1] -= THRUST * math.cos(rot_rad) * a.throttle
-        self.__net_torque += (self.__size[1] / 2 * PIXELS_PER_METER) * THRUST * math.sin(math.radians(gimbal_angle)) * a.throttle
+        self.__net_torque += (self.__size[1] / 2 / PIXELS_PER_METER) * THRUST * math.sin(math.radians(gimbal_angle)) * a.throttle

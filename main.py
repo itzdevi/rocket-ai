@@ -3,12 +3,13 @@ import ai_agent
 import keyboard_agent
 
 import constants
+import math
 
-# a = app.App(keyboard_agent.KeyboardAgent())
-a = app.App(ai_agent.AIAgent("./model/model.pt"))
+a = app.App(keyboard_agent.KeyboardAgent())
+# a = app.App(ai_agent.AIAgent("./model/model.pt"))
 
 while a.is_running():
-    print(0.3 - a.env.get_state().velocity[1])
+    print(a.env.get_state().distance_from_touchdown[1])
     a.tick()
     a.draw()
     

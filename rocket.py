@@ -55,6 +55,9 @@ class Rocket:
         alt = st.distance_from_touchdown[1]
         rot = st.rotation
         ang_vel = st.angular_velocity
+        lateral_vel = st.velocity[0]
+        lateral_dist = st.distance_from_touchdown[0]
+
 
         # phase 1
         rew_phase1 = 0
@@ -84,8 +87,15 @@ class Rocket:
         # phase 3
         rew_phase3 = 6 * np.exp(-3 * abs(rot))
         rew_phase3 -= 4 * ang_vel**2
-        
-        reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase3
+
+        # phase 4
+        rew_phase4 = np.sign(lateral_vel) * -np.sign(lateral_dist) * 5
+        if rew_phase4 == 0:
+            rew_phase4 = -3
+        if abs(lateral_dist) < 0.04:
+            rew_phase4 = 10
+
+        reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase3 * 0.3 + rew_phase4
         return reward
 
 
@@ -100,7 +110,7 @@ class Rocket:
         self.__handle_collisions()
 
     def draw(self, graphics: graphics.Graphics):
-        graphics.draw_image(self.__image, (0, 0), self.rotation)
+        graphics.draw_image(self.__image, (0, 0), self.rotation, True, self.__image.get_rect().size)
 
     def __apply_gravity(self):
         self.__net_force[1] += GRAVITY * self.__mass

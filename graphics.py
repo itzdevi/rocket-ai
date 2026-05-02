@@ -23,14 +23,15 @@ class Graphics:
         rect = pygame.Rect(left, top, size[0], size[1])
         pygame.draw.rect(self.__surface, color, rect)
 
-    def draw_image(self, image:  pygame.Surface, view_position, rotation, size=None):
+    def draw_image(self, image:  pygame.Surface, view_position, rotation, consider_zoom, size=None):
         image_cpy = copy(image)
 
         if size:
             image_cpy = pygame.transform.scale(image_cpy, size)
 
         rect = image_cpy.get_rect()
-        rect.size = rect.size[0] * self.__zoom, rect.size[1] * self.__zoom
+        if consider_zoom:
+            rect.size = rect.size[0] * self.__zoom, rect.size[1] * self.__zoom
         rect.left = self.screen_size[0] / 2 + view_position[0] - rect.width / 2
         rect.top = self.screen_size[1] / 2 + view_position[1] - rect.height / 2
         image_cpy = pygame.transform.scale(image_cpy, rect.size)

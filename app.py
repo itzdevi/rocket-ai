@@ -1,4 +1,5 @@
 import pygame
+import earth
 import graphics
 import rocket
 import ground
@@ -15,6 +16,7 @@ class App:
         self.__graphics = graphics.Graphics(WINDOW_SIZE)
         self.env = rocket.Rocket()
         self.__ground = ground.Ground()
+        self.__earth = earth.Earth()
         self.__touchdown_point = touchdown_point.TouchdownPoint()
         self.__clock = pygame.time.Clock()
         self.__zoom = 1
@@ -34,6 +36,7 @@ class App:
         self.__graphics.set_zoom(self.__zoom)
         self.__graphics.fill((0, 0, 0))
 
+        self.__earth.draw(self.__graphics, self.__zoom)
         self.__ground.draw(self.__graphics, self.env.position, self.__graphics.screen_size, self.__zoom)
         self.__touchdown_point.draw(self.__graphics, self.env.position, self.__zoom)
         self.env.draw(self.__graphics)

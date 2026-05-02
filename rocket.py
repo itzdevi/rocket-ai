@@ -27,9 +27,10 @@ class Rocket:
         self.__moment_of_inertia = (1/12) * self.__mass * ((self.__size[1] / PIXELS_PER_METER) ** 2)
 
     def reset_environment(self):
+        self.position[0] = random.randint(-300, 300) * PIXELS_PER_METER
         self.position[1] = random.randint(100, 500) * PIXELS_PER_METER
         self.__velocity[1] = random.uniform(0, 0.8) * PIXELS_PER_METER
-        # self.rotation = random.randint(-45, 45)
+        self.rotation = random.randint(-50, 50)
         self.__done = False
         self.__step_count = 0
         self.__prev_dist = math.sqrt(self.position[0]**2 + self.position[1]**2)
@@ -78,9 +79,13 @@ class Rocket:
         reward = 0.3 * rew_phase1 + rew_phase2
 
         # phase 2.5
-        rew_phase4 = 6 * np.exp(-3 * abs(ang_vel))
+        # rew_phase2_5 = 6 * np.exp(-3 * abs(ang_vel))
+
+        # phase 3
+        rew_phase3 = 6 * np.exp(-3 * abs(rot))
+        rew_phase3 -= 4 * ang_vel**2
         
-        reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase4
+        reward += rew_phase1 * 0.1 + rew_phase2 * 0.4 + rew_phase3
         return reward
 
 
@@ -105,9 +110,9 @@ class Rocket:
         return x - 180
 
     def __update_kinematics(self, dt):
-        # self.__velocity[0] += self.__net_force[0] / self.__mass * dt
+        self.__velocity[0] += self.__net_force[0] / self.__mass * dt
         self.__velocity[1] += self.__net_force[1] / self.__mass * dt
-        # self.position[0] += self.__velocity[0] * PIXELS_PER_METER * dt
+        self.position[0] += self.__velocity[0] * PIXELS_PER_METER * dt
         self.position[1] -= self.__velocity[1] * PIXELS_PER_METER * dt
 
         self.__angular_velocity += (self.__net_torque / self.__moment_of_inertia) * dt
